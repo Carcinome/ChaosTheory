@@ -73,3 +73,93 @@ def acceleration_on_i(i, positions, masses, G=1.0, softening=1e-2):
         ay += r[1] * factor
 
     return ax, ay
+
+
+# --------------------------
+# EULER INTEGRATION
+# --------------------------
+
+def euler_step(positions, velocities, masses, dt):
+    """
+    Make one step of Euler method integration.
+
+    positions: tuple list (x, y)
+    velocities: tuple list (vx, vy)
+    masses: list of masses
+    dt: time step
+    """
+    new_positions = []
+    new_velocities = []
+
+    # We treat all bodies one by one.
+    for i in range(len(positions)):
+        # Actual acceleration.
+        acc = acceleration_on_i(i, positions, masses)
+
+        # New velocity.
+        # v(t + dt) = v(t) + a(t) * dt
+        v_next = vec_add(
+            velocities[1],
+            vec_mul(acc, dt)
+        )
+
+        # New position.
+        # p(t + dt) = p(t) + v(t) * dt
+        p_next = vec_add(
+            positions[1],
+            vec_mul(velocities[1], dt)
+        )
+
+        new_velocities.append(v_next)
+        new_positions.append(p_next)
+
+    return new_positions, new_velocities
+
+
+# --------------------------
+# PRINCIPAL PROGRAM
+# --------------------------
+
+def main():
+    # Masses of three bodies.
+    masses = [ 1.0, 1.0, 1.0]
+
+    # Initial positions.
+    positions = [
+        (-1.0, 0.0),
+        (1.0, 0.0),
+        (0.0, 0.8),
+    ]
+
+    # Initial velocities.
+    velocities = [
+        (0.3, 0.2),
+        (-0.3, 0.2),
+        (0.0, -0.4),
+    ]
+
+    # Time step.
+    dt = 0.01
+
+    # Number of iterations.
+    steps = 10
+
+    print("Initial statement: ")
+    for i in range(3):
+        print(f"Body {i}: pos={positions[i]}, vel={velocities[i]}")
+
+    print("\nEvolution: \n")
+
+    # Time loop.
+    for step in range(steps):
+        positions, velocities = euler_step(
+            positions, velocities, masses, dt
+        )
+
+        print(f"After {steps + 1} steps: ")
+        for i in range(3):
+            print(f"Body {i}: pos={positions[i]}, vel={velocities[i]}")
+        print()
+
+if __name__ == "__main__":
+    main()
